@@ -10,18 +10,15 @@ import (
 	"strings"
 )
 
+var session *gocql.Session
+
 func password_hash(password string) string {
 	hash := sha512.Sum512([]byte(password))
 	return hex.EncodeToString(hash[:])
 }
 
 func user(w http.ResponseWriter, r *http.Request) {
-	cluster := gocql.NewCluster("127.0.0.1")
-	cluster.Keyspace = "century"
-	cluster.Consistency = gocql.Quorum
-	session, _ := cluster.CreateSession()
-	defer session.Close()
-	//////////////////////////////////////
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -47,12 +44,6 @@ func user(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	cluster := gocql.NewCluster("127.0.0.1")
-	cluster.Keyspace = "century"
-	cluster.Consistency = gocql.Quorum
-	session, _ := cluster.CreateSession()
-	defer session.Close()
-	/////////////////////////////////////////////
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -93,12 +84,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func login_check(w http.ResponseWriter, r *http.Request) {
-	cluster := gocql.NewCluster("127.0.0.1")
-	cluster.Keyspace = "century"
-	cluster.Consistency = gocql.Quorum
-	session, _ := cluster.CreateSession()
-	defer session.Close()
-	/////////////////////////////////////////
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	var login string
 	if r.Method == "GET" {
@@ -133,12 +118,6 @@ func login_check(w http.ResponseWriter, r *http.Request) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-	cluster := gocql.NewCluster("127.0.0.1")
-	cluster.Keyspace = "century"
-	cluster.Consistency = gocql.Quorum
-	session, _ := cluster.CreateSession()
-	defer session.Close()
-	////////////////////////////////////////////
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	cookie, err := r.Cookie("sessionToken")
 	if r.Method == "POST" {
@@ -166,8 +145,7 @@ func main() {
 	cluster := gocql.NewCluster("127.0.0.1")
 	cluster.Keyspace = "century"
 	cluster.Consistency = gocql.Quorum
-	session, _ := cluster.CreateSession()
-	defer session.Close()
+	session, _ = cluster.CreateSession()
 	session.Query("CREATE TABLE IF NOT EXIST users (login text PRIMARY KEY, password text)").Exec()
 	session.Query("CREATE TABLE IF NOT EXIST cookies (login text, cookie UUID PRIMARY KEY)").Exec()
 	session.Query("CREATE INDEX IF NOT EXIST ON cookies(login)").Exec()
